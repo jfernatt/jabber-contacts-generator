@@ -1,4 +1,10 @@
+#!/usr/bin/env python
+
 import os
+import readline
+
+csv_header = 'User ID, User Domain, Contact ID, Contact Domain, Nickname, Group Name \n'
+csv_row = "{}, {}, {}, {},, {}\n"
 
 def find_os():
     if os.name == 'nt':
@@ -10,11 +16,11 @@ def find_os():
 def valid_domain(domain):
     is_domain = True
     try:
-        domain_array = domain.split('.')
+        domain_split = domain.split('.')
     except:
         is_domain = False
     else:
-        for element in domain_array:
+        for element in domain_split:
             if element.isalnum() == False:
                 is_domain = False
     return
@@ -22,6 +28,9 @@ def valid_domain(domain):
 def get_input():
     clear_screen = find_os()
     getting_input = True
+    contact_list = "contacts.txt"
+    output_filename = "ImportList.csv"
+
     while getting_input:
         os.system(clear_screen)
         group_name = input("Enter a group name: ")
@@ -31,33 +40,31 @@ def get_input():
         domain = input("Enter domain name: ")
         if domain.upper() == 'EXIT':
             break
-
         if valid_domain(domain) == False:
             print("Invalid input, try again")
         else:
             getting_input = False
-    return[group_name, domain]
+    return[group_name, domain, contact_list, output_filename]
     
-def generate_contacts():
-    contact_array = []
-    with open('contacts.txt' , 'r') as contacts:
+def generate_contacts(contacts_file="contacts.txt"):
+    contact_list = []
+    with open(contacts_file, 'r') as contacts:
         for line in contacts:
-            append = line.strip('\n')
-            contact_array.append(append)
-    return contact_array
+            new_line = line.strip('\n')
+            contact_list.append(new_line)
+    return contact_list
     
-def write_csv(contact_array, domain, group):
-    with open('ImportList.csv', 'w') as ImportList:
-        ImportList.write('User ID, User Domain, Contact ID, Contact Domain, Nickname, Group Name \n')
-        for user in contact_array:
-            for contact in contact_array:
+def write_csv(contact_list, domain, group, output_filename='ImportList.csv'):
+    with open(output_filename, 'w') as contact_csv:
+        contact_csv.write(csv_header)
+        for user in contact_list:
+            for contact in contact_list:
                 if user != contact:
-                    ctString = (user + ', ' + domain + ',' + contact + ',' + domain + ',,' + group + '\n')
-                    ImportList.write(ctString)
+                    new_row = csv_row.format(user, domain, contact, domain, group)
+                    contact_csv.write(new_row)
     return
     
 if __name__ == '__main__':
-
-    domain, group = get_input()
-    contact_array = generate_contacts()
-    write_csv(contact_array, domain, group)
+    domain, group, contact_list, output_filename = get_input()
+    contact_list = generate_contacts()
+    write_csv(contact_list, domain, group)
